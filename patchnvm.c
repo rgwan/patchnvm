@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <string.h>
 
 int validate_chksum(FILE * fp)
 {
@@ -38,8 +39,9 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2) {
 		fprintf(stderr,
-			"Usage %s: <nvm file> [address] [value to write]\n",
-			argv[0]);
+			"Usage\n"
+			"\t %s: <nvm file> [address] [value to write]\n"
+			"\t %s: <nvm file> [mac-address]\n", argv[0], argv[0]);
 		return -1;
 	}
 	FILE *fp = fopen(argv[1], "rb+");
@@ -61,6 +63,28 @@ int main(int argc, char *argv[])
 		fseek(fp, 2 * chgaddr, SEEK_SET);
 		fwrite(&chgvalue, 2, 1, fp);
 	}
+	int chgmac = 0;
+	uint8_t mac_buf[6];
+	if (argc == 3) {
+		int j;
+		char octet_buf[3];
+		memset(octet_buf, 0x00, sizeof(octet_buf));
+		if (strlen(argv[2]) != 12) {
+			fprintf(stderr, "MAC format is not correct!\n");
+			return -1;
+		}
+		for (j = 0; j < 6; j++) {
+			memcpy(octet_buf, &argv[2][2 * j], 2);
+			mac_buf[j] = strtoul(octet_buf, NULL, 16);
+		}
+		printf("New MAC address will be: ");
+		for (j = 0; j < 6; j++)
+			printf("%02x%s", mac_buf[j], j < 5 ? ":" : "");
+		puts("");
+		fseek(fp, 0, SEEK_SET);
+		fwrite(mac_buf, 1, 6, fp);
+		chgmac = 1;
+	}
 
 	int i;
 	uint16_t value;
@@ -71,11 +95,11 @@ int main(int argc, char *argv[])
 		}
 		fread(&value, 2, 1, fp);
 		printf(" %04X", value);
-		if (i == chgaddr)
+		if (i == chgaddr || (chgmac && i < 3))
 			printf("*");
 	}
 	puts("");
-	if (chgaddr != -1) {
+	if (chgaddr != -1 || chgmac) {
 		generate_chksum(fp);
 
 		ret = validate_chksum(fp);
