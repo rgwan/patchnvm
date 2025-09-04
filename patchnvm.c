@@ -39,13 +39,14 @@ void generate_chksum(FILE *fp)
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
-		fprintf(stderr, "Usage %s: <nvm file> [address] [value to write]", argv[0]);
+		fprintf(stderr, "Usage %s: <nvm file> [address] [value to write]\n", argv[0]);
 		return -1;
 	}
 	FILE *fp = fopen(argv[1], "rb+");
 	int ret;
 	if (!fp) {
 		fprintf(stderr, "Cannot open file %s!\n", argv[1]);
+		return -1;
 	}
 	ret = validate_chksum(fp);
 	if (ret)
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 
 	int chgaddr = -1;
 	uint16_t chgvalue;
-	if (argc >= 4) {
+	if (argc == 4) {
 		chgaddr = strtoul(argv[2], NULL, 16);
 		chgvalue = strtoul(argv[3], NULL, 16);
 		printf("Needs to change %02x to %04x\n", chgaddr, chgvalue);
