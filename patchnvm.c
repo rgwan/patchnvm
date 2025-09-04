@@ -3,43 +3,43 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 
-int validate_chksum(FILE *fp)
+int validate_chksum(FILE * fp)
 {
 	fseek(fp, 0, SEEK_SET);
 	uint16_t value;
 	uint16_t chksum = 0;
 	int i;
-	for(i = 0; i < 0x40; i++)
-	{
+	for (i = 0; i < 0x40; i++) {
 		fread(&value, 2, 1, fp);
 		chksum += value;
 	}
-	printf("validate chksum = %04x\n", value);
+	printf("validate chksum = %04x, %04x\n", value, chksum);
 	if (chksum == 0xbaba)
 		return 0;
 	return 1;
 }
 
-void generate_chksum(FILE *fp)
+void generate_chksum(FILE * fp)
 {
-        fseek(fp, 0, SEEK_SET);
-        uint16_t value;
-        uint16_t chksum = 0;
-        int i;
-        for(i = 0; i < 0x3F; i++)
-        {
-                fread(&value, 2, 1, fp);
-                chksum += value;
-        }
+	fseek(fp, 0, SEEK_SET);
+	uint16_t value;
+	uint16_t chksum = 0;
+	int i;
+	for (i = 0; i < 0x3F; i++) {
+		fread(&value, 2, 1, fp);
+		chksum += value;
+	}
 	chksum = 0xbaba - chksum;
-        printf("chksum = %04x\n", chksum);
+	printf("chksum = %04x\n", chksum);
 	fwrite(&chksum, 2, 1, fp);
 }
 
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
-		fprintf(stderr, "Usage %s: <nvm file> [address] [value to write]\n", argv[0]);
+		fprintf(stderr,
+			"Usage %s: <nvm file> [address] [value to write]\n",
+			argv[0]);
 		return -1;
 	}
 	FILE *fp = fopen(argv[1], "rb+");
@@ -65,22 +65,22 @@ int main(int argc, char *argv[])
 	int i;
 	uint16_t value;
 	fseek(fp, 0, SEEK_SET);
-	for(i = 0; i < 0x40; i++) {
+	for (i = 0; i < 0x40; i++) {
 		if (i % 16 == 0) {
 			printf("\n%02x: ", i);
 		}
 		fread(&value, 2, 1, fp);
 		printf(" %04X", value);
-		if(i == chgaddr)
+		if (i == chgaddr)
 			printf("*");
 	}
 	puts("");
-	if (chgaddr != -1)
+	if (chgaddr != -1) {
 		generate_chksum(fp);
 
-	ret = validate_chksum(fp);
-        if (ret)
-                fprintf(stderr, "Validate chksum failed\n");
+		ret = validate_chksum(fp);
+		if (ret)
+			fprintf(stderr, "Validate chksum failed\n");
+	}
 	fclose(fp);
 }
-
