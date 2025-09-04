@@ -74,7 +74,8 @@ int main(int argc, char *argv[])
 			printf("*");
 	}
 	puts("");
-	generate_chksum(fp);
+	if (chgaddr != -1)
+		generate_chksum(fp);
 
 	ret = validate_chksum(fp);
         if (ret)
