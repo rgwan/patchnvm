@@ -41,7 +41,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr,
 			"Usage\n"
 			"\t %s: <nvm file> [address] [value to write]\n"
-			"\t %s: <nvm file> [mac-address]\n", argv[0], argv[0]);
+			"\t %s: <nvm file> [mac-address]\n"
+			"\nNote: DO NOT USE DUMPED FLASH IMAGE FROM EEUPDATE!\n",
+			argv[0], argv[0]);
 		return -1;
 	}
 	FILE *fp = fopen(argv[1], "rb+");
