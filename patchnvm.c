@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h> // This program is for little-endian only
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,6 +32,7 @@ void generate_chksum(FILE * fp)
 	}
 	chksum = 0xbaba - chksum;
 	printf("chksum = %04x\n", chksum);
+	fseek(fp, 2 * 0x3F, SEEK_SET);
 	fwrite(&chksum, 2, 1, fp);
 }
 
@@ -39,10 +40,11 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2) {
 		fprintf(stderr,
-			"Usage\n"
+			"Usage:\n"
 			"\t %s: <nvm file> [address] [value to write]\n"
 			"\t %s: <nvm file> [mac-address]\n"
-			"\nNote: DO NOT USE DUMPED FLASH IMAGE FROM EEUPDATE!\n",
+			"\nNote: DO NOT USE DUMPED FLASH IMAGE FROM EEUPDATE!\n"
+			"Zhiyuan Wan <hikari@iloli.bid>, 2025/9/6\n",
 			argv[0], argv[0]);
 		return -1;
 	}
