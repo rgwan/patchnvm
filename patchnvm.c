@@ -32,7 +32,7 @@ void generate_chksum(FILE * fp)
 	}
 	chksum = 0xbaba - chksum;
 	printf("chksum = %04x\n", chksum);
-	fseek(fp, 2 * 0x3F, SEEK_SET);
+	fseek(fp, 0, SEEK_CUR);
 	fwrite(&chksum, 2, 1, fp);
 }
 
